@@ -1,0 +1,113 @@
+#!/bin/bash
+# EVS seasonal component - plots step job wrapper
+# This script is intended to be called by a driver script that sets:
+#   STEP=plots, COMPONENT=seasonal, RUN=det|ens
+
+set -euo pipefail
+set -x
+
+###############################################################################
+# 1) Basic guards
+###############################################################################
+: "${HOMEevs:?HOMEevs must be set (repo root path in ops/dev env)}"
+: "${RUN:?RUN must be set to det or ens}"
+: "${STEP:=plots}"
+: "${COMPONENT:=seasonal}"
+
+if [[ "${RUN}" != "det" && "${RUN}" != "ens" ]]; then
+  echo "ERROR: RUN must be 'det' or 'ens'. Got: ${RUN}"
+  exit 2
+fi
+
+###############################################################################
+# 2) Paths and defaults
+###############################################################################
+export NET="${NET:-evs}"
+export envir="${envir:-prod}"
+export DATAROOT="${DATAROOT:-/tmp/${USER}/evs/${NET}/${COMPONENT}/${STEP}}"
+export COMROOT="${COMROOT:-/tmp/${USER}/evs/com}"
+export COMIN="${COMIN:-${COMROOT}/in/${NET}}"
+export COMOUT="${COMOUT:-${COMROOT}/out/${NET}/${STEP}/${COMPONENT}/${RUN}}"
+
+export EVS_CONFIG_DIR="${EVS_CONFIG_DIR:-${HOMEevs}/parm/evs_config/${COMPONENT}}"
+export EVS_COMMON_CONF="${EVS_COMMON_CONF:-${EVS_CONFIG_DIR}/seasonal_common.conf}"
+export EVS_RUN_CONF="${EVS_RUN_CONF:-${EVS_CONFIG_DIR}/seasonal_${RUN}.conf}"
+
+export USHseasonal="${USHseasonal:-${HOMEevs}/ush/seasonal}"
+export SCRIPTseasonal="${SCRIPTseasonal:-${HOMEevs}/scripts/seasonal/plots}"
+
+mkdir -p "${DATAROOT}" "${COMOUT}"
+cd "${DATAROOT}"
+
+###############################################################################
+# 3) Load configuration
+###############################################################################
+if [[ ! -f "${EVS_COMMON_CONF}" ]]; then
+  echo "ERROR: Missing common config: ${EVS_COMMON_CONF}"
+  exit 3
+fi
+
+if [[ ! -f "${EVS_RUN_CONF}" ]]; then
+  echo "ERROR: Missing run config: ${EVS_RUN_CONF}"
+  exit 3
+fi
+
+# shellcheck disable=SC1090
+source "${EVS_COMMON_CONF}"
+# shellcheck disable=SC1090
+source "${EVS_RUN_CONF}"
+
+###############################################################################
+# 4) Compute cycle/time context
+###############################################################################
+export PDY="${PDY:-$(date -u +%Y%m%d)}"
+export cyc="${cyc:-00}"
+export cycle="${PDY}${cyc}"
+
+export WORK_BASE="${WORK_BASE:-${DATAROOT}/${COMPONENT}/${RUN}/${cycle}}"
+export PLOT_OUT_BASE="${PLOT_OUT_BASE:-${COMOUT}/${cycle}}"
+mkdir -p "${WORK_BASE}" "${PLOT_OUT_BASE}"
+
+echo "=== EVS seasonal plots ==="
+echo "NET=${NET} envir=${envir} STEP=${STEP} COMPONENT=${COMPONENT} RUN=${RUN}"
+echo "cycle=${cycle}"
+echo "COMIN=${COMIN}"
+echo "COMOUT=${COMOUT}"
+echo "WORK_BASE=${WORK_BASE}"
+echo "PLOT_OUT_BASE=${PLOT_OUT_BASE}"
+
+###############################################################################
+# 5) Run seasonal plots workflow
+###############################################################################
+PLOT_SCRIPT="${SCRIPTseasonal}/seasonal_plot_wrapper.sh"
+
+if [[ -x "${PLOT_SCRIPT}" ]]; then
+  "${PLOT_SCRIPT}" \
+    --run "${RUN}" \
+    --cycle "${cycle}" \
+    --workdir "${WORK_BASE}" \
+    --outdir "${PLOT_OUT_BASE}"
+else
+  echo "INFO: Plot wrapper not found at ${PLOT_SCRIPT}"
+  echo "INFO: Falling back to placeholder plot artifact."
+
+  cat > "${PLOT_OUT_BASE}/seasonal_plot.${RUN}.${cycle}.txt" <<EOF
+NET=${NET}
+envir=${envir}
+STEP=${STEP}
+COMPONENT=${COMPONENT}
+RUN=${RUN}
+cycle=${cycle}
+status=placeholder
+SEASONAL_MODELS=${SEASONAL_MODELS:-}
+SEASONAL_OBS=${SEASONAL_OBS:-}
+SEASONAL_LEADS=${SEASONAL_LEADS:-}
+SEASONAL_DOMAINS=${SEASONAL_DOMAINS:-}
+EOF
+fi
+
+###############################################################################
+# 6) Completion marker
+###############################################################################
+touch "${PLOT_OUT_BASE}/seasonal_plots.${RUN}.${cycle}.done"
+echo "SUCCESS: seasonal plots complete for RUN=${RUN}, cycle=${cycle}"
