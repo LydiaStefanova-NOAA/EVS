@@ -4,6 +4,8 @@
 echo "INITYEAR=$INITYEAR"
 echo "INITMONTH=$INITMONTH"
 echo "SFS_SRC_ROOT=$SFS_SRC_ROOT"
+echo "SFS_LEAD_MONTHLY_CLIMO_DIR=$SFS_LEAD_MONTHLY_CLIMO_DIR"
+echo "MODELNAME=$MODELNAME"
 
 echo "BEGIN: $(basename ${BASH_SOURCE[0]})"
 
@@ -28,13 +30,13 @@ fi
 BASE_IN=${SFS_SRC_ROOT}/init_${INITMONTH}/${INITYEAR}
 
 # Base output directories for monthly forecast
-BASE_OUT=${COMOUT}/${RUN}.${INITYEAR}${INITMONTH}
-mkdir -p $BASE_OUT/fcst/sfs
+BASE_OUT=${COMOUT}/${RUN}.${INITYEAR}${INITMONTH}/$MODELNAME
+mkdir -p $BASE_OUT
 
 # Copy forecast data into the seasonal EVS prep layout
 if [ -d "$BASE_IN" ]; then
-    echo "Copying SFS forecast files from $BASE_IN to ${BASE_OUT}/fcst/sfs"
-    cp -r "${BASE_IN}/." "${BASE_OUT}/fcst/sfs/"
+    echo "Copying SFS forecast files from $BASE_IN to ${BASE_OUT}"
+    cp -r "${BASE_IN}/." "${BASE_OUT}/"
 else
     echo "WARNING: SFS source directory not found: ${BASE_IN}"
 fi
@@ -57,8 +59,7 @@ echo "DEBUG DATA=$DATA"
 # ==============================================================================
 # Calculate Ensemble Mean and Stdev (Explicit Paths, No Wildcards in Loop)
 # ==============================================================================
-FCST_SFS="${BASE_OUT}/fcst/sfs"
-ENS_DIR="${FCST_SFS}/ens"
+ENS_DIR="${BASE_OUT}/ens"
 mkdir -p "$ENS_DIR"
 
 # Scratch directory for parallel NetCDF conversion
@@ -69,9 +70,9 @@ mkdir -p "$TMP_NC_DIR"
 NUM_MEMBERS=31
 
 # Get the exact filenames from mem000 to determine valid leads without date math
-if [ -d "${FCST_SFS}/mem000" ]; then
+if [ -d "${BASE_OUT}/mem000" ]; then
     # Grab the literal filenames for both instantaneous and accumulated products
-    EXACT_FILENAMES=$(cd "${FCST_SFS}/mem000" && ls inst.monthly.*.grb2 acc.monthly.*.grb2 2>/dev/null)
+    EXACT_FILENAMES=$(cd "${BASE_OUT}/mem000" && ls inst.monthly.*.grb2 acc.monthly.*.grb2 2>/dev/null)
 
     for EXACT_FILENAME in $EXACT_FILENAMES; do
         echo "Processing ensemble stats for ${EXACT_FILENAME}..."
@@ -82,7 +83,7 @@ if [ -d "${FCST_SFS}/mem000" ]; then
         MEMBER_FILES=()
         for (( i=0; i<NUM_MEMBERS; i++ )); do
             mem_dir=$(printf "mem%03d" "$i")
-            mem_file="${FCST_SFS}/${mem_dir}/${EXACT_FILENAME}"
+            mem_file="${BASE_OUT}/${mem_dir}/${EXACT_FILENAME}"
             
             if [ -f "${mem_file}" ]; then
                 MEMBER_FILES+=("${mem_file}")
@@ -121,7 +122,7 @@ if [ -d "${FCST_SFS}/mem000" ]; then
         fi
     done
 else
-    echo "WARNING: ${FCST_SFS}/mem000 not found. Cannot determine file list for ensemble statistics."
+    echo "WARNING: ${BASE_OUT}/mem000 not found. Cannot determine file list for ensemble statistics."
 fi
 
 # Clean up temporary NetCDF directory entirely

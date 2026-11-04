@@ -1,7 +1,7 @@
 #!/bin/bash
 # modulefile for EVS seasonal component, stats step
 
-set -x
+#set -x   #lbs temporary commenting out
 
 module load PrgEnv-intel/${PrgEnvintel_ver}
 module load intel/${intel_ver}
@@ -25,4 +25,4 @@ module load metplus/${metplus_ver}
 
 module list
 
-set -x
+#set -x   #lbs temporary commenting out

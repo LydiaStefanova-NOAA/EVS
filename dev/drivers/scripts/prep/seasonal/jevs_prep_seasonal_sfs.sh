@@ -43,18 +43,17 @@ export NET=evs
 export STEP=prep
 export COMPONENT=seasonal
 export RUN=atmos
-export MODELNAME=sfs
+export MODELNAME="${sfs_b2:-sfs_b2}"
 export PREP_TYPE=sfs
 
 #### Below are things to check with Mallory - key words, config
 
 # Origin directory with the SFS-related data
-export SFS_SRC_ROOT=${SFS_SRC_ROOT:-"/lfs/h2/emc/vpppg/noscrub/lydia.b.stefanova/sfs-ver-dev/SFS_VERIF_DATA/forecasts"}
+export SFS_SRC_ROOT="${SFS_SRC_ROOT:-/lfs/h2/emc/vpppg/noscrub/lydia.b.stefanova/sfs-ver-dev/SFS_VERIF_DATA/forecasts/${MODELNAME:-sfs_b2}}"
 
 # Origin directory with the Fix/climo roots for lead-dependent forecast climatology
-# export FIXevs=${FIXevs:-$HOMEevs/fix}
-export FIXevs=${FIXevs:-$SFS_SRC_ROOT}
-export SFS_LEAD_MONTHLY_CLIMO_DIR=${SFS_LEAD_MONTHLY_CLIMO_DIR:-$FIXevs/seasonal/sfs}
+export FIXevs=${FIXevs:-$HOMEevs/fix}
+export SFS_LEAD_MONTHLY_CLIMO_DIR="${SFS_LEAD_MONTHLY_CLIMO_DIR:-${FIXevs}/climo/seasonal/${MODELNAME:-sfs_b2}}"
 
 #  
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # modulefile for EVS seasonal component, plots step
 
-set -x
+#set -x #lbs temporary commenting out
 
 module load PrgEnv-intel/${PrgEnvintel_ver}
 module load intel/${intel_ver}
@@ -28,4 +28,4 @@ export DBNROOT=$SIPHONROOT
 
 module list
 
-set -x
+#set -x #lbs temporary commenting out

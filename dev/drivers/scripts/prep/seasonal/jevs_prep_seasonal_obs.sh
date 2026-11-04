@@ -50,18 +50,11 @@ export PREP_TYPE=obs
 export OBS_SRC_ROOT=${OBS_SRC_ROOT:-"/lfs/h2/emc/vpppg/noscrub/lydia.b.stefanova/sfs-ver-dev/SFS_VERIF_DATA/verifying_truths"}
 
 # FUTURE Fix/climo roots for monthly obs climatology
-#export FIXevs=${FIXevs:-$HOMEevs/fix}
-#export GHCN_CAMS_CLIMO_DIR=${GHCN_CAMS_CLIMO_DIR:-$FIXevs/seasonal/GHCN}
-#export CMAP_CLIMO_DIR=${CMAP_CLIMO_DIR:-$FIXevs/seasonal/CMAP}
-#export CORE_CLIMO_DIR=${CORE_CLIMO_DIR:-$FIXevs/seasonal/CORE}
-#export OISST_CLIMO_DIR=${OISST_CLIMO_DIR:-$FIXevs/seasonal/OISST}
-
-# TEMPORARY Fix/climo roots for monthly obs climatology
-export FIXevs=${FIXevs:-$OBS_SRC_ROOT}
-export GHCN_CAMS_CLIMO_DIR=${GHCN_CAMS_CLIMO_DIR:-$FIXevs/GHCNCAMS/}
-export CMAP_CLIMO_DIR=${CMAP_CLIMO_DIR:-$FIXevs/CMAP/}
-export CORE_CLIMO_DIR=${CORE_CLIMO_DIR:-$FIXevs/CORE/}
-export OISST_CLIMO_DIR=${OISST_CLIMO_DIR:-$FIXevs/OISST/}
+export FIXevs=${FIXevs:-$HOMEevs/fix}
+export GHCN_CAMS_CLIMO_DIR=${GHCN_CAMS_CLIMO_DIR:-$FIXevs/seasonal/GHCN}
+export CMAP_CLIMO_DIR=${CMAP_CLIMO_DIR:-$FIXevs/seasonal/CMAP}
+export CORE_CLIMO_DIR=${CORE_CLIMO_DIR:-$FIXevs/seasonal/CORE}
+export OISST_CLIMO_DIR=${OISST_CLIMO_DIR:-$FIXevs/seasonal/OISST}
 
 
 
