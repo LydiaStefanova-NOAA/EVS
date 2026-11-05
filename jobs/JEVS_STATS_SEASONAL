@@ -15,9 +15,9 @@ export DATA=${DATA:-${DATAROOT:?}/${jobid:?}}
 mkdir -p $DATA
 cd $DATA
 
-####################################
-### Define NET/RUN variables
-######################################
+###########################################################
+# Define NET/RUN variables   <---- Many of these are passed in from the jevs script - where should they be?
+#############################################################
 export NET=${NET:-evs}
 export STEP=${STEP:-stats}
 export COMPONENT=${COMPONENT:-seasonal}
@@ -30,12 +30,13 @@ export machine=${machine:-WCOSS2}
 # SENDECF=YES--Flag events on ecflow
 # SENDDBN=YES--Issue DBNet Client Calls
 ################################################################
+
 export SENDCOM=${SENDCOM:-YES}
 export SENDDBN=${SENDDBN:-YES}       # need to set to NO for testing
 export SENDECF=${SENDECF:-YES}
 
 ################################################################
-# Set EVS directories
+# Set EVS directories   <---- Many of these are passed in from the jevs script - where should they be?
 ################################################################
 export HOMEevs=${HOMEevs:-${PACKAGEROOT}/${NET}.${evs_ver}}
 export EXECevs=${EXECevs:-$HOMEevs/exec}
@@ -43,58 +44,67 @@ export PARMevs=${PARMevs:-$HOMEevs/parm}
 export USHevs=${USHevs:-$HOMEevs/ush}
 export FIXevs=${FIXevs:-$HOMEevs/fix}
 
-
-
-# ***SEASONAL*** turn the PDY result into previous months; see JEVS_SEASONAL_PREP
-
-###
+#################################################################
+# Required to be set, even if they are not used
+# ###############################################################
 export vhr=${vhr:-00}
 export cycle=${cycle:-t${vhr}z}
+
+###############################################################################
+# SEASONAL OPERATES WITH MONTHLY MEANS (no DD)
+# --> turn the PDY result into previous month(s); see JEVS_SEASONAL_PREP
+# ##############################################################################
 
 setpdy.sh
 . ./PDY
 # HARDWIRE FOR TESTING UNTIL FINALIZED
 PDY=20261012
+PDY=20251012
 
 # Current month baseline (YYYYMM)
-
 export YYYYMM="${PDY:0:6}"
 
-# 2. Dynamically set and export M1 through M12
+# 2. Dynamically set and export M1 through M12 (inits that can be verified now)
 for m in {1..12}; do
     # Pinning to day 01 (${PDY:0:6}01) ensures deterministic month-length stepping
     ym=$(date -d "${PDY:0:6}01 - ${m} month" +%Y%m)
-
     # Export combined YYYYMM
     export "YYYYMM_M${m}=${ym}"
-
     # (Optional) Export split components for easy directory templating
     export "YEAR_M${m}=${ym:0:4}"
     export "MONTH_M${m}=${ym:4:2}"
 done
 
+####################################################################################
+# Export the INITYEAR, INITMONTH, AND (SET OF) VDATES (currently just one VDATE)
+# ##################################################################################
 export INITYEAR="${YYYYMM_M1:0:4}"
 export INITMONTH="${YYYYMM_M1:4:2}"
-
-
-
 export VDATE=${VDATE:-$YYYYMM_M1}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
 export COMIN=${COMIN:-$(compath.py ${envir}/com/$NET/$evs_ver/prep)/$COMPONENT/$RUN}
-export EVSINclimo=${EVSINclimo:-$FIXevs/climos/atmos}
 export COMOUT=${COMOUT:-$(compath.py -o $NET/$evs_ver/$STEP/$COMPONENT)}
-export COMOUTsmall=$COMOUT/$RUN.$VDATE/$MODELNAME/$VERIF_CASE
-export COMOUTfinal=$COMOUT/$MODELNAME.$VDATE
 
-mkdir -p $COMOUT $COMOUTfinal
+###################################################
+# SET UP OTHER INFO NEED TO RUN SCRIPT
+# (constructed variables)
+
+export MONTHLY_CLIMATOLOGY_ROOT=${MONTHLY_CLIMATOOGY_ROOT:-$FIXevs/climos/seasonal}
+
+#export COMOUTsmall=$COMOUT/$RUN.$VDATE/$MODELNAME/$VERIF_TYPE
+#export COMOUTfinal=$COMOUT/$MODELNAME.$VDATE
+
+mkdir -p $COMOUT
 
 #######################################################################
 # Execute the script
 #######################################################################
-$HOMEevs/scripts/$STEP/$COMPONENT/exevs_${STEP}_${COMPONENT}_${VERIF_CASE}.sh
+
+echo SUBMITTING $HOMEevs/scripts/$STEP/$COMPONENT/exevs_${STEP}_${COMPONENT}_${VERIF_TYPE}.sh
+$HOMEevs/scripts/$STEP/$COMPONENT/exevs_${STEP}_${COMPONENT}_${VERIF_TYPE}.sh
 export err=$?; err_chk
 
 

@@ -7,29 +7,49 @@
 #PBS -l place=shared,select=1:ncpus=1:mem=20GB
 #PBS -l debug=true
 
-#set -x
+#set -x #lbs temporarily commented out
 
+####################################################################
+# STANDARD PREAMBLE
+####################################################################
 export model=evs
-
 cd $PBS_O_WORKDIR
-
 export HOMEevs=/lfs/h2/emc/vpppg/noscrub/$USER/EVS
 
+####################################################################
+# Specify step, component, modelname, verif_type
+####################################################################
+export STEP=prep
+export COMPONENT=seasonal
+export RUN=atmos
+export MODELNAME=sfs_b2
+export PREP_TYPE=sfs
+
+######################################################################
+# Set job name based on step, component, modelname, verif_type
+######################################################################
+export job=${PBS_JOBNAME:-jevs_${STEP}_${COMPONENT}_${PREP_TYPE}}
+export jobid=$job.${PBS_JOBID:-$$}
+
+######################################################################
+# Source standard scripts, load modules
+######################################################################
 source $HOMEevs/versions/run.ver
 module reset
 module load prod_envir/${prod_envir_ver}
 source $HOMEevs/dev/modulefiles/seasonal/seasonal_prep.sh
-
 evs_ver_2d=$(echo $evs_ver | cut -d'.' -f1-2)
 
+######################################################################
+# Export environment variables to pass on to JEVS_${STEP^^}_${COMPONENT^^}
+######################################################################
 export envir=prod
-export DATAROOT=/lfs/h2/emc/stmp/$USER/evs_test/$envir/tmp
-export job=${PBS_JOBNAME:-jevs_prep_seasonal_sfs}
-export jobid=$job.${PBS_JOBID:-$$}
-export TMPDIR=$DATAROOT
-export SITE=$(cat /etc/cluster_name)
 export KEEPDATA=NO
+export SITE=$(cat /etc/cluster_name)
 export SENDMAIL=YES
+
+export DATAROOT=/lfs/h2/emc/stmp/$USER/evs_test/$envir/tmp
+export TMPDIR=$DATAROOT
 
 export USER=$USER
 export ACCOUNT=VERF-DEV
@@ -40,33 +60,27 @@ export PARTITION_BATCH=
 export nproc=1
 export vhr=00
 export NET=evs
-export STEP=prep
-export COMPONENT=seasonal
-export RUN=atmos
-export MODELNAME="${sfs_b2:-sfs_b2}"
-export PREP_TYPE=sfs
 
-#### Below are things to check with Mallory - key words, config
-
-# Origin directory with the SFS-related data
-export SFS_SRC_ROOT="${SFS_SRC_ROOT:-/lfs/h2/emc/vpppg/noscrub/lydia.b.stefanova/sfs-ver-dev/SFS_VERIF_DATA/forecasts/${MODELNAME:-sfs_b2}}"
-
-# Origin directory with the Fix/climo roots for lead-dependent forecast climatology
-export FIXevs=${FIXevs:-$HOMEevs/fix}
-export SFS_LEAD_MONTHLY_CLIMO_DIR="${SFS_LEAD_MONTHLY_CLIMO_DIR:-${FIXevs}/climo/seasonal/${MODELNAME:-sfs_b2}}"
-
-#  
-
+########################################################################
+# Paths required for this task
+########################################################################
 export COMOUT=/lfs/h2/emc/vpppg/noscrub/$USER/$NET/${evs_ver_2d}/$STEP/$COMPONENT/$RUN
+export FIXevs=${FIXevs:-$HOMEevs/fix}
 
-# If you have a seasonal config file, uncomment this
-#export config_inst=$HOMEevs/parm/evs_config/seasonal/config.evs.prep.seasonal.sfsinst.conf
-#export config_inst=$HOMEevs/parm/evs_config/seasonal/config.evs.prep.seasonal.sfsacc.conf
+###### Since the incoming data is currently not on dcom, point to my personal directory ####################
+# RESOLVE DETAILS LATER
+###################################################################################################
+export SFS_SRC_ROOT="/lfs/h2/emc/vpppg/noscrub/lydia.b.stefanova/sfs-ver-dev/SFS_VERIF_DATA/forecasts/${MODELNAME:-sfs_b2}"
+export SFS_LEAD_MONTHLY_CLIMO_DIR="${FIXevs}/climos/seasonal/${MODELNAME}"
+
+################ If a seasonal config file, uncomment this #############################################
+# export config_inst=$HOMEevs/parm/evs_config/${COMPONENT}/config.evs.${STEP}.${COMPONENT}.${PREP_TYPE}.conf
 
 source $HOMEevs/dev/drivers/set_MAILTO.sh
 
 # Call executable job script
-$HOMEevs/jobs/JEVS_PREP_SEASONAL
+echo calling $HOMEevs/jobs/JEVS_${STEP^^}_${COMPONENT^^}
+$HOMEevs/jobs/JEVS_${STEP^^}_${COMPONENT^^}
 
 ######################################################################
 # Purpose: This job and task scripts work together to retrieve the

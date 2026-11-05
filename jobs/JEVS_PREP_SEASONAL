@@ -55,6 +55,7 @@ setpdy.sh
 
 # HARDWIRE FOR TESTING UNTIL FINALIZED
 PDY=202610112
+PDY=202510112
 
 # Derive the previous month from PDY
 # Setting it to day "01" of the current $PDY ensures safe backtracking
