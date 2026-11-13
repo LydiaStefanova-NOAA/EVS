@@ -19,17 +19,31 @@ echo MONTHLY_CLIMATOLOGY_ROOT $MONTHLY_CLIMATOLOGY_ROOT
 echo COMIN $COMIN
 echo COMOUT $COMOUT
 
-export FCST_GRID_STAT_INPUT_DIR=${COMIN}/atmos.${INITYEAR}${INITMONTH}/${MODELNAME}/ens
-export OBS_GRID_STAT_INPUT_DIR=${COMIN}/atmos.${INITYEAR}${INITMONTH}/obs/CORE/HGT500
-export FCST_CLIMO_DIR=${MONTHLY_CLIMATOLOGY_ROOT}/${MODELNAME}/init_${INITMONTH}
-export OBS_CLIMO_DIR=${MONTHLY_CLIMATOLOGY_ROOT}/CORE
+export OBSNAME="CORe"
+export VARNAME="HGT500"
+
+
+#export FCST_GRID_STAT_INPUT_DIR=${COMIN}/atmos.${INITYEAR}${INITMONTH}/${MODELNAME}/ens
+#export OBS_GRID_STAT_INPUT_DIR=${COMIN}/atmos.${INITYEAR}${INITMONTH}/obs/${OBSNAME}
+#export FCST_CLIMO_DIR=${MONTHLY_CLIMATOLOGY_ROOT}/${MODELNAME}/init_${INITMONTH}
+#export OBS_CLIMO_DIR=${MONTHLY_CLIMATOLOGY_ROOT}/${OBSNAME}
+export TARGET_YEAR=$INITYEAR
+export TARGET_MONTH=$INITMONTH
+
+export FCST_GRID_STAT_INPUT_DIR=${COMIN}
+export OBS_GRID_STAT_INPUT_DIR=${COMIN}
+export FCST_CLIMO_DIR=${MONTHLY_CLIMATOLOGY_ROOT}/${MODELNAME}
+export OBS_CLIMO_DIR=${MONTHLY_CLIMATOLOGY_ROOT}/${OBSNAME}
+
 export OUTPUT_BASE=${COMOUT}
-export GRID_STAT_OUTPUT_DIR=${COMOUT}/${MODELNAME}.${VDATE}
+
+export GRID_STAT_OUTPUT_DIR=${COMOUT}/${MODELNAME}.${INITYEAR}${INITMONTH}
 
 
 # Source config
 #echo $config
-run_metplus.py -c ${PARMevs}/metplus_config/stats/seasonal/grid2grid/sfs_rmse_ensmean_lead00.conf
+#run_metplus.py -c ${PARMevs}/metplus_config/stats/seasonal/grid2grid/sfs_rmse_ensmean_lead00.conf
+run_metplus.py -c ${PARMevs}/metplus_config/stats/seasonal/grid2grid/sfs_deterministic.conf
 
 
 export err=$?; err_chk

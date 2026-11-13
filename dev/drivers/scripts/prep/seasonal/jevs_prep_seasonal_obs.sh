@@ -43,7 +43,7 @@ export NET=evs
 export STEP=prep
 export COMPONENT=seasonal
 export RUN=atmos
-export OBSNAME="GHCN CMAP CORE"
+export OBSNAME="GHCNCAMS CMAP CORe"
 export PREP_TYPE=obs
 
 # This is where you will pass the source roots for the observation files
@@ -51,10 +51,10 @@ export OBS_SRC_ROOT=${OBS_SRC_ROOT:-"/lfs/h2/emc/vpppg/noscrub/lydia.b.stefanova
 
 # FUTURE Fix/climo roots for monthly obs climatology
 export FIXevs=${FIXevs:-$HOMEevs/fix}
-export GHCN_CAMS_CLIMO_DIR=${GHCN_CAMS_CLIMO_DIR:-$FIXevs/seasonal/GHCN}
-export CMAP_CLIMO_DIR=${CMAP_CLIMO_DIR:-$FIXevs/seasonal/CMAP}
-export CORE_CLIMO_DIR=${CORE_CLIMO_DIR:-$FIXevs/seasonal/CORE}
-export OISST_CLIMO_DIR=${OISST_CLIMO_DIR:-$FIXevs/seasonal/OISST}
+export GHCNCAMS_CLIMO_DIR=${GHCN_CAMS_CLIMO_DIR:-$FIXevs/climos/seasonal/GHCNCAMS}
+export CMAP_CLIMO_DIR=${CMAP_CLIMO_DIR:-$FIXevs/climos/seasonal/CMAP}
+export CORe_CLIMO_DIR=${CORE_CLIMO_DIR:-$FIXevs/climos/seasonal/CORe}
+export OISSTv2_CLIMO_DIR=${OISST_CLIMO_DIR:-$FIXevs/climos/seasonal/OISSTv2}
 
 
 

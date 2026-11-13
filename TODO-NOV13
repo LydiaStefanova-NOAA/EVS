@@ -1,0 +1,4 @@
+refactor prep step to acquire any forecasts and obs for the requested VDATE and store under evs..
+refactor stat step to look for all forecasts in the same place
+rename the climos accordingly (00, 1m, etc)
+remove confusing INITDATE references from scripts

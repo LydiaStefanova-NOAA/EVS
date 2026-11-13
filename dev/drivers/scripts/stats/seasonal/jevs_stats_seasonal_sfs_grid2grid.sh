@@ -44,7 +44,7 @@ evs_ver_2d=$(echo $evs_ver | cut -d'.' -f1-2)
 # Export environment variables to pass on to JEVS_${STEP^^}_${COMPONENT^^}  
 ######################################################################
 export envir=prod    
-export KEEPDATA=NO
+export KEEPDATA=YES
 export SITE=$(cat /etc/cluster_name)
 export SENDMAIL=YES
 

@@ -1,0 +1,1 @@
+ncdump -h /lfs/h2/emc/vpppg/noscrub/lydia.b.stefanova/evs/v2.0/stats/seasonal/sfs_b2.202510/grid_stat_sfs_b2_ensmean_HGT500_init20250901_valid202510/grid_stat_000000L_20251001_000000V_pairs.nc | grep -i climo

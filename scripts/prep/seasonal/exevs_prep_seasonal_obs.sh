@@ -26,8 +26,8 @@ fi
 
 # Base output directories for monthly obs
 BASE_OUT=${COMOUT}/${RUN}.${INITYEAR}${INITMONTH}
-mkdir -p $BASE_OUT/obs
-mkdir -p $BASE_OUT/fcst
+#mkdir -p $BASE_OUT/obs
+#mkdir -p $BASE_OUT/$MODELNAME
 
 
 echo "DEBUG OBS_SRC_ROOT=$OBS_SRC_ROOT"
@@ -48,7 +48,7 @@ done
 # -------------------------------------------------------------
 # 1. GHCNCAMS and CMAP (Path: <OBS>/monthly/)
 # -------------------------------------------------------------
-for obs in GHCNCAMS CMAP; do
+for obs in GHCNCAMS CMAP CORe; do
     src_dir="${OBS_SRC_ROOT}/${obs}/monthly"
     dest_dir="${BASE_OUT}/obs/${obs}"
 
@@ -67,42 +67,18 @@ for obs in GHCNCAMS CMAP; do
     fi
 done
 
-# -------------------------------------------------------------
-# 2. CORE (Path: CORE/<VARIABLE>/monthly/)
-# -------------------------------------------------------------
-for var_path in "${OBS_SRC_ROOT}/CORE"/*/; do
-    var_name="$(basename "$var_path")"
-    src_dir="${var_path}monthly"
-    dest_dir="${BASE_OUT}/obs/CORE/${var_name}"
-
-    found=0
-    for file in "${src_dir}"/*"${INITYEAR}${INITMONTH}"*.nc; do
-        if [ -f "$file" ]; then
-            mkdir -p "$dest_dir"
-            echo "Copying CORE/${var_name}/$(basename "$file") -> $dest_dir"
-            cp "$file" "$dest_dir/"
-            found=1
-        fi
-    done
-
-    if [ "$found" -eq 0 ]; then
-        echo "WARNING: no file found for ${INITYEAR}${INITMONTH} in $src_dir"
-    fi
-done
-
-
 # Optional: validate monthly climatology files are present
 # These will be used by later seasonal stats jobs
 for climo in \
-    "${GHCN_CAMS_CLIMO_DIR}" \
+    "${GHCNCAMS_CLIMO_DIR}" \
     "${CMAP_CLIMO_DIR}" \
-    "${CORE_CLIMO_DIR}" \
-    "${OISST_CLIMO_DIR}"
+    "${CORe_CLIMO_DIR}" \
+    "${OISSTv2_CLIMO_DIR}"
 do
-    if [ -d "$climo/climatology" ]; then
-        echo "Found climatology directory: $climo/climatology"
+    if [ -d "$climo" ]; then
+        echo "Found climatology directory: $climo"
     else
-        echo "WARNING: climatology directory not found: $climo/climatology"
+        echo "WARNING: climatology directory not found: $climo"
     fi
 done
 

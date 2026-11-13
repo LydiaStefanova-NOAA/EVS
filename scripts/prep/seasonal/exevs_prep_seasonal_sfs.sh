@@ -66,8 +66,12 @@ mkdir -p "$ENS_DIR"
 TMP_NC_DIR="${DATA}/tmp_ens_nc_$$"
 mkdir -p "$TMP_NC_DIR"
 
-# SFS forecasts have 31 members
-NUM_MEMBERS=31
+# SFS forecasts have 31 members for 2026. For earlier years, only 11. 
+if [ "$INITYEAR" = "2026" ]; then
+    NUM_MEMBERS=31
+else
+    NUM_MEMBERS=11
+fi
 
 # Get the exact filenames from mem000 to determine valid leads without date math
 if [ -d "${BASE_OUT}/mem000" ]; then
