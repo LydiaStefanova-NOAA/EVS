@@ -1,0 +1,64 @@
+#!/bin/bash
+# ==============================================================================
+# EVS Seasonal Verification Configuration for sfs_b2
+# Shared by prep (SFS & Obs), stats, and plots.
+# To add a new variable: add a VAR<N>_* block and increment NVARS.
+# ==============================================================================
+
+export NVARS=3
+
+# --- Variable 1: 500 hPa Geopotential Height (CORe) ---
+export VAR1_ID="HGT500"
+export VAR1_FCST_STREAM="inst"
+export VAR1_FCST_VAR="HGT_500mb"
+export VAR1_FCST_LEVEL="(0,*,*)"
+export VAR1_OBS_NAME="CORe"
+export VAR1_OBS_PREFIX="CORe_HGT500"
+export VAR1_OBS_VAR="HGT_500mb"
+export VAR1_OBS_LEVEL="(0,*,*)"
+export VAR1_OBS_CLIMO_LEVEL="(*,*)"
+
+# --- Variable 2: 850mb Temperature (CORe) ---
+export VAR2_ID="TMP850"
+export VAR2_FCST_STREAM="inst"
+export VAR2_FCST_VAR="TMP_850mb"
+export VAR2_FCST_LEVEL="(0,*,*)"
+export VAR2_OBS_NAME="CORe"
+export VAR2_OBS_PREFIX="CORe_TMP850"
+export VAR2_OBS_VAR="TMP_850mb"
+export VAR2_OBS_LEVEL="(0,*,*)"
+export VAR2_OBS_CLIMO_LEVEL="(*,*)"
+
+# --- Variable 3: Surface Skin Temperature (CORe) ---
+export VAR3_ID="TSKIN"
+export VAR3_FCST_STREAM="inst"
+export VAR3_FCST_VAR="TMP_surface"
+export VAR3_FCST_LEVEL="(0,*,*)"
+export VAR3_OBS_NAME="CORe"
+export VAR3_OBS_PREFIX="CORe_TSKIN"
+export VAR3_OBS_VAR="TMP_surface"
+export VAR3_OBS_LEVEL="(0,*,*)"
+export VAR3_OBS_CLIMO_LEVEL="(*,*)"
+
+# ==============================================================================
+# Templates for Additional Variables (uncomment & increment NVARS when ready)
+# ==============================================================================
+# export VAR4_ID="PRATE"
+# export VAR4_FCST_STREAM="acc"
+# export VAR4_FCST_VAR="PRATE_surface"
+# export VAR4_FCST_LEVEL="(0,*,*)"
+# export VAR4_OBS_NAME="CMAP"
+# export VAR4_OBS_PREFIX="CMAP_PRATE"
+# export VAR4_OBS_VAR="PRATE_surface"
+# export VAR4_OBS_LEVEL="(0,*,*)"
+# export VAR4_OBS_CLIMO_LEVEL="(*,*)"
+#
+# export VAR5_ID="TMP2M_GHCN"
+# export VAR5_FCST_STREAM="inst"
+# export VAR5_FCST_VAR="TMP_2maboveground"
+# export VAR5_FCST_LEVEL="(0,*,*)"
+# export VAR5_OBS_NAME="GHCNCAMS"
+# export VAR5_OBS_PREFIX="GHCNCAMS"
+# export VAR5_OBS_VAR="air"
+# export VAR5_OBS_LEVEL="(0,*,*)"
+# export VAR5_OBS_CLIMO_LEVEL="(*,*)"

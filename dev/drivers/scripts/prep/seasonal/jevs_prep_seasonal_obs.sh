@@ -70,8 +70,9 @@ export OISSTv2_CLIMO_DIR=${OISSTv2_CLIMO_DIR:-$FIXevs/climos/seasonal/OISSTv2}
 
 export COMOUT=/lfs/h2/emc/vpppg/noscrub/$USER/$NET/${evs_ver_2d}/$STEP/$COMPONENT/$RUN
 
-# Once I have a seasonal config file, uncomment this
-# export config=$HOMEevs/parm/evs_config/seasonal/config.evs.seasonal.obs.prep
+# Use shared config to specify scope
+export MODELNAME=sfs_b2
+export config=${config:-$HOMEevs/parm/evs_config/${COMPONENT}/config.evs.${COMPONENT}.${MODELNAME}}
 
 source $HOMEevs/dev/drivers/set_MAILTO.sh
 

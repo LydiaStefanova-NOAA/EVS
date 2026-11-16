@@ -73,8 +73,10 @@ export FIXevs=${FIXevs:-$HOMEevs/fix}
 export SFS_SRC_ROOT="/lfs/h2/emc/vpppg/noscrub/lydia.b.stefanova/sfs-ver-dev/SFS_VERIF_DATA/forecasts/${MODELNAME:-sfs_b2}"
 export SFS_LEAD_MONTHLY_CLIMO_DIR="${FIXevs}/climos/seasonal/${MODELNAME}"
 
-################ If a seasonal config file, uncomment this #############################################
+################ Use config to specify scope #############################################
 # export config_inst=$HOMEevs/parm/evs_config/${COMPONENT}/config.evs.${STEP}.${COMPONENT}.${PREP_TYPE}.conf
+export MODELNAME=sfs_b2
+export config=${config:-$HOMEevs/parm/evs_config/${COMPONENT}/config.evs.${COMPONENT}.${MODELNAME}}
 
 source $HOMEevs/dev/drivers/set_MAILTO.sh
 
