@@ -3,7 +3,8 @@
 # Author(s)/Contact(s): Lydia Stefanova
 # Creation date: 11/4/2026
 # Abstract: Launched by jobs/JEVS_STATS_SEASONAL
-#           calculates grid-to-grid verification for SFS forecasts
+#           Calculates grid-to-grid verification for SFS forecasts in $DATA
+#           using CFP parallel execution and copies .stat files to $COMOUT via cpfs.
 
 set -x
 exec </dev/null
@@ -16,7 +17,7 @@ echo "VERIF_TYPE=$VERIF_TYPE"
 die() {
     echo "$1" >&2
     if command -v err_exit >/dev/null 2>&1; then
-        SENDECF=NO err_exit "$1" || true
+        SENDECF=${SENDECF:-NO} err_exit "$1" || true
     fi
     exit 1
 }
@@ -29,7 +30,9 @@ fi
 
 export MAX_LEAD=${MAX_LEAD:-11}
 export USE_CFP=${USE_CFP:-YES}
+export SENDCOM=${SENDCOM:-YES}
 export nproc=${nproc:-1}
+export PARMevs=${PARMevs:-${HOMEevs}/parm}
 export config=${config:-${PARMevs}/evs_config/${COMPONENT}/config.evs.${COMPONENT}.${MODELNAME}}
 
 [ -f "$config" ] || die "ERROR: Required EVS config file not found: '${config}'."
@@ -40,8 +43,13 @@ source "$config"
 export FCST_GRID_STAT_INPUT_DIR=${COMIN}
 export OBS_GRID_STAT_INPUT_DIR=${COMIN}
 export FCST_CLIMO_DIR=${MONTHLY_CLIMATOLOGY_ROOT}/${MODELNAME}
-export GRID_STAT_OUTPUT_DIR=${COMOUT}/${MODELNAME}.${VDATE}
-mkdir -p "$GRID_STAT_OUTPUT_DIR" "${DATA}/jobs" "${DATA}/logs" || die "ERROR: Failed to create output/job/log directories."
+
+# Write all GridStat .stat files to isolated task dirs under $DATA first, then copy to $COMOUT via cpfs
+WORK_STAT_OUT="${DATA}/grid_stat_out"
+COM_STAT_OUT="${COMOUT}/${MODELNAME}.${VDATE}"
+export GRID_STAT_OUTPUT_DIR="${WORK_STAT_OUT}"
+
+mkdir -p "$WORK_STAT_OUT" "${DATA}/jobs" "${DATA}/logs" || die "ERROR: Failed to create working directories under ${DATA}."
 
 CMDFILE="${DATA}/cmdfile"
 : > "$CMDFILE"
@@ -158,3 +166,23 @@ if [ "$err" -ne 0 ]; then
     fi
     err_chk
 fi
+
+# Publish finished .stat files from isolated $DATA task dirs to flat $COMOUT via cpfs
+if [ "$SENDCOM" = "YES" ]; then
+    mkdir -p "$COM_STAT_OUT" || die "ERROR: Failed to create ${COM_STAT_OUT}."
+    copied=0
+    while IFS= read -r -d '' stat_file; do
+        task_tag=$(basename "$(dirname "$stat_file")")
+        base_stat=$(basename "$stat_file")
+        if [[ "$base_stat" == *"$task_tag"* ]]; then
+            dest_stat="$base_stat"
+        else
+            dest_stat="${task_tag}_${base_stat}"
+        fi
+        cpfs "$stat_file" "${COM_STAT_OUT}/${dest_stat}"
+        copied=$((copied + 1))
+    done < <(find "${WORK_STAT_OUT}" -type f -name "*.stat" -print0)
+    [ "$copied" -gt 0 ] || die "ERROR: No .stat files found in ${WORK_STAT_OUT} to copy to ${COM_STAT_OUT}."
+fi
+
+echo "END: $(basename ${BASH_SOURCE[0]})"

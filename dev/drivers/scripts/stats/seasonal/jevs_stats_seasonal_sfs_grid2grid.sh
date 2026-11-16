@@ -4,7 +4,7 @@
 #PBS -q "dev"
 #PBS -A VERF-DEV
 #PBS -l walltime=00:20:00
-#PBS -l place=vscatter:shared,select=1:ncpus=1:ompthreads=1:mem=70GB
+#PBS -l place=vscatter:shared,select=1:ncpus=12:mpiprocs=12:ompthreads=1:mem=40GB
 #PBS -l debug=true
 
 set -x
@@ -47,6 +47,7 @@ evs_ver_2d=$(echo $evs_ver | cut -d'.' -f1-2)
 ######################################################################
 export envir=prod
 export KEEPDATA=YES
+export SENDCOM=YES
 export SITE=$(cat /etc/cluster_name)
 export SENDMAIL=YES
 
@@ -59,9 +60,9 @@ export QUEUE=dev
 export QUEUESHARED=dev_shared
 export QUEUESERV=dev_transfer
 export PARTITION_BATCH=
-export nproc=1
+export nproc=12
 
-export USE_CFP=NO
+export USE_CFP=YES
 export vhr=00
 export NET=evs
 
@@ -81,16 +82,10 @@ export COMIN=/lfs/h2/emc/vpppg/noscrub/$USER/$NET/${evs_ver_2d}/prep/$COMPONENT/
 export COMOUT=/lfs/h2/emc/vpppg/noscrub/$USER/$NET/${evs_ver_2d}/$STEP/$COMPONENT
 
 ############################################################################
-# Optional config
+# Shared EVS Seasonal Config
 ############################################################################
-# export config=$HOMEevs/parm/evs_config/${COMPONENT}/config.evs.${STEP}.${COMPONENT}.${MODELNAME}.${VERIF_TYPE}.stats
+export config=$HOMEevs/parm/evs_config/${COMPONENT}/config.evs.${COMPONENT}.${MODELNAME}
 
 # Call executable job script
 echo "calling $HOMEevs/jobs/JEVS_${STEP^^}_${COMPONENT^^}"
 $HOMEevs/jobs/JEVS_${STEP^^}_${COMPONENT^^}
-
-######################################################################
-# Purpose: The job and task scripts work together to generate the
-#          seasonal verification grid2grid statistics for the SFS model
-#          and create the stat files in the databases.
-######################################################################
