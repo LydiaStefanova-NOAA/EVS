@@ -23,7 +23,6 @@ export COMPONENT=${COMPONENT:-seasonal}
 export RUN=${RUN:-atmos}
 export machine=${machine:-WCOSS2}
 
-
 ################################################################
 # Set data directives
 # SENDCOM=YES--Copy files from TMPDIR to $COMOUT
@@ -45,7 +44,6 @@ export PARMevs=${PARMevs:-$HOMEevs/parm}
 export USHevs=${USHevs:-$HOMEevs/ush}
 export FIXevs=${FIXevs:-$HOMEevs/fix}
 
-
 ###
 export vhr=${vhr:-00}
 export cycle=${cycle:-t${vhr}z}
@@ -54,10 +52,16 @@ setpdy.sh
 . ./PDY
 
 # Derive the previous month from PDY (or use externally provided VDATE)
+# This is the target verification month (YYYYMM)
 export VDATE=${VDATE:-$(date -d "${PDY:0:6}01 -1 month" +"%Y%m")}
-export INITYEAR="${VDATE:0:4}"
-export INITMONTH="${VDATE:4:2}"
+if [[ "$VDATE" =~ ^[0-9]{6}([0-9]{2})?$ ]]; then
+    VDATE="${VDATE:0:6}"
+else
+    err_exit "ERROR: VDATE must be in YYYYMM or YYYYMMDD format (got: '${VDATE}')."
+fi
 
+# Maximum forecast lead in months (0 = VDATE init, 1 = VDATEm1 init, ..., 11 = VDATEm11 init)
+export MAX_LEAD=${MAX_LEAD:-11}
 
 #######################################################################
 # Execute the script
@@ -70,5 +74,3 @@ if [ "$KEEPDATA" != "YES" ] ; then
   cd $DATAROOT
   rm -rf $DATA
 fi
-
-

@@ -5,7 +5,7 @@ set -x
 # ###################################
 # SET SHELL PROCESSING VARIABLES
 # ###################################
-export PS4='$SECONDS + ' 
+export PS4='$SECONDS + '
 date
 
 ###########################################################
@@ -16,7 +16,7 @@ mkdir -p $DATA
 cd $DATA
 
 ###########################################################
-# Define NET/RUN variables   <---- Many of these are passed in from the jevs script - where should they be?
+# Define NET/RUN variables
 #############################################################
 export NET=${NET:-evs}
 export STEP=${STEP:-stats}
@@ -30,13 +30,12 @@ export machine=${machine:-WCOSS2}
 # SENDECF=YES--Flag events on ecflow
 # SENDDBN=YES--Issue DBNet Client Calls
 ################################################################
-
 export SENDCOM=${SENDCOM:-YES}
-export SENDDBN=${SENDDBN:-YES}       # need to set to NO for testing
-export SENDECF=${SENDECF:-YES}
+export SENDDBN=${SENDDBN:-NO}       # set to NO for testing
+export SENDECF=${SENDECF:-NO}
 
 ################################################################
-# Set EVS directories   <---- Many of these are passed in from the jevs script - where should they be?
+# Set EVS directories
 ################################################################
 export HOMEevs=${HOMEevs:-${PACKAGEROOT}/${NET}.${evs_ver}}
 export EXECevs=${EXECevs:-$HOMEevs/exec}
@@ -46,21 +45,19 @@ export FIXevs=${FIXevs:-$HOMEevs/fix}
 
 #################################################################
 # Required to be set, even if they are not used
-# ###############################################################
+#################################################################
 export vhr=${vhr:-00}
 export cycle=${cycle:-t${vhr}z}
 
 ###############################################################################
 # SEASONAL OPERATES WITH MONTHLY MEANS (no DD)
-# --> turn the PDY result into previous month; see JEVS_SEASONAL_PREP
-# ##############################################################################
-
+# --> turn the PDY result into previous month; see JEVS_PREP_SEASONAL
+###############################################################################
 setpdy.sh
 . ./PDY
 
 export VDATE=${VDATE:-$(date -d "${PDY:0:6}01 -1 month" +"%Y%m")}
-export INITYEAR="${VDATE:0:4}"
-export INITMONTH="${VDATE:4:2}"
+export MAX_LEAD=${MAX_LEAD:-11}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
@@ -69,24 +66,18 @@ export COMIN=${COMIN:-$(compath.py ${envir}/com/$NET/$evs_ver/prep)/$COMPONENT/$
 export COMOUT=${COMOUT:-$(compath.py -o $NET/$evs_ver/$STEP/$COMPONENT)}
 
 ###################################################
-# SET UP OTHER INFO NEED TO RUN SCRIPT
-# (constructed variables)
-
-export MONTHLY_CLIMATOLOGY_ROOT=${MONTHLY_CLIMATOOGY_ROOT:-$FIXevs/climos/seasonal}
-
-#export COMOUTsmall=$COMOUT/$RUN.$VDATE/$MODELNAME/$VERIF_TYPE
-#export COMOUTfinal=$COMOUT/$MODELNAME.$VDATE
+# SET UP OTHER INFO NEEDED TO RUN SCRIPT
+###################################################
+export MONTHLY_CLIMATOLOGY_ROOT=${MONTHLY_CLIMATOLOGY_ROOT:-$FIXevs/climos/seasonal}
 
 mkdir -p $COMOUT
 
 #######################################################################
 # Execute the script
 #######################################################################
-
-echo SUBMITTING $HOMEevs/scripts/$STEP/$COMPONENT/exevs_${STEP}_${COMPONENT}_${VERIF_TYPE}.sh
+echo "SUBMITTING $HOMEevs/scripts/$STEP/$COMPONENT/exevs_${STEP}_${COMPONENT}_${VERIF_TYPE}.sh"
 $HOMEevs/scripts/$STEP/$COMPONENT/exevs_${STEP}_${COMPONENT}_${VERIF_TYPE}.sh
 export err=$?; err_chk
-
 
 if [ "$KEEPDATA" != "YES" ] ; then
   cd $DATAROOT

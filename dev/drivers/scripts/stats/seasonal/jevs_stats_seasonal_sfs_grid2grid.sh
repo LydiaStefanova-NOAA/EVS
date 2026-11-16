@@ -7,28 +7,30 @@
 #PBS -l place=vscatter:shared,select=1:ncpus=1:ompthreads=1:mem=70GB
 #PBS -l debug=true
 
-set -x  # lbs temporarily commented out
+set -x
 
 ####################################################################
 # STANDARD PREAMBLE
 ####################################################################
 export model=evs
-cd $PBS_O_WORKDIR
+if [ -n "${PBS_O_WORKDIR:-}" ]; then
+    cd "$PBS_O_WORKDIR"
+fi
 export HOMEevs=/lfs/h2/emc/vpppg/noscrub/$USER/EVS
 
-#################################################################### 
+####################################################################
 # Specify run type, EVS step, component, verif_type, modelname
-#################################################################### 
+####################################################################
 export RUN=atmos
 export STEP=stats
-export COMPONENT=seasonal 
+export COMPONENT=seasonal
 export VERIF_TYPE=grid2grid
-export MODELNAME=sfs_b2 
+export MODELNAME=sfs_b2
 
 ######################################################################
 # Set job name based on step, component, modelname, verif_type
 ######################################################################
-export job=${PBS_JOBNAME:-jevs_${STEP}_${COMPONENT}_${MODELNAME}_${VERIF_TYPE}}  
+export job=${PBS_JOBNAME:-jevs_${STEP}_${COMPONENT}_${MODELNAME}_${VERIF_TYPE}}
 export jobid=$job.${PBS_JOBID:-$$}
 
 ######################################################################
@@ -37,13 +39,13 @@ export jobid=$job.${PBS_JOBID:-$$}
 source $HOMEevs/versions/run.ver
 module reset
 module load prod_envir/${prod_envir_ver}
-source $HOMEevs/dev/modulefiles/seasonal/seasonal_stats.sh   
+source $HOMEevs/dev/modulefiles/seasonal/seasonal_stats.sh
 evs_ver_2d=$(echo $evs_ver | cut -d'.' -f1-2)
 
 ######################################################################
-# Export environment variables to pass on to JEVS_${STEP^^}_${COMPONENT^^}  
+# Export environment variables to pass on to JEVS_${STEP^^}_${COMPONENT^^}
 ######################################################################
-export envir=prod    
+export envir=prod
 export KEEPDATA=YES
 export SITE=$(cat /etc/cluster_name)
 export SENDMAIL=YES
@@ -54,14 +56,26 @@ export TMPDIR=$DATAROOT
 export USER=$USER
 export ACCOUNT=VERF-DEV
 export QUEUE=dev
-export QUEUESHARED=dev_shared  
-export QUEUESERV=dev_transfer  
+export QUEUESHARED=dev_shared
+export QUEUESERV=dev_transfer
 export PARTITION_BATCH=
-export nproc=1           # Note: Edit to reflect how many processes (matches how many jobs are created, and matches ncpus)
+export nproc=1
 
-export USE_CFP=YES        # Note: This is not there in the Prep script - is it necessary in all stat scripts 
-export vhr=00             # Note: placeholder, not really used, but has to be there
+export USE_CFP=NO
+export vhr=00
 export NET=evs
+
+# Normalize externally supplied VDATE (accepts YYYYMM or YYYYMMDD; otherwise J-job derives from PDY)
+if [ -n "${VDATE:-}" ]; then
+    if [[ "$VDATE" =~ ^[0-9]{6}([0-9]{2})?$ ]]; then
+        export VDATE="${VDATE:0:6}"
+    else
+        echo "ERROR: VDATE must be in YYYYMM or YYYYMMDD format (got: '${VDATE}')."
+        exit 1
+    fi
+fi
+
+export MAX_LEAD=${MAX_LEAD:-11}
 
 export COMIN=/lfs/h2/emc/vpppg/noscrub/$USER/$NET/${evs_ver_2d}/prep/$COMPONENT/$RUN
 export COMOUT=/lfs/h2/emc/vpppg/noscrub/$USER/$NET/${evs_ver_2d}/$STEP/$COMPONENT
@@ -69,11 +83,10 @@ export COMOUT=/lfs/h2/emc/vpppg/noscrub/$USER/$NET/${evs_ver_2d}/$STEP/$COMPONEN
 ############################################################################
 # Optional config
 ############################################################################
-echo export config=$HOMEevs/parm/evs_config/${COMPONENT}/config.evs.${STEP}.${COMPONENT}.${MODELNAME}.${VERIF_TYPE}.stats
+# export config=$HOMEevs/parm/evs_config/${COMPONENT}/config.evs.${STEP}.${COMPONENT}.${MODELNAME}.${VERIF_TYPE}.stats
 
 # Call executable job script
-#
-echo calling $HOMEevs/jobs/JEVS_${STEP^^}_${COMPONENT^^}
+echo "calling $HOMEevs/jobs/JEVS_${STEP^^}_${COMPONENT^^}"
 $HOMEevs/jobs/JEVS_${STEP^^}_${COMPONENT^^}
 
 ######################################################################

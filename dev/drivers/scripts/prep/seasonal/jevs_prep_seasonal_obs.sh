@@ -11,7 +11,9 @@
 
 export model=evs
 
-cd $PBS_O_WORKDIR
+if [ -n "${PBS_O_WORKDIR:-}" ]; then
+    cd "$PBS_O_WORKDIR"
+fi
 
 export HOMEevs=/lfs/h2/emc/vpppg/noscrub/$USER/EVS
 
@@ -46,18 +48,25 @@ export RUN=atmos
 export OBSNAME="GHCNCAMS CMAP CORe"
 export PREP_TYPE=obs
 
-# This is where you will pass the source roots for the observation files
+# Normalize externally supplied VDATE (accepts YYYYMM or YYYYMMDD; otherwise J-job derives from PDY)
+if [ -n "${VDATE:-}" ]; then
+    if [[ "$VDATE" =~ ^[0-9]{6}([0-9]{2})?$ ]]; then
+        export VDATE="${VDATE:0:6}"
+    else
+        echo "ERROR: VDATE must be in YYYYMM or YYYYMMDD format (got: '${VDATE}')."
+        exit 1
+    fi
+fi
+
+# Source root for monthly observation files
 export OBS_SRC_ROOT=${OBS_SRC_ROOT:-"/lfs/h2/emc/vpppg/noscrub/lydia.b.stefanova/sfs-ver-dev/SFS_VERIF_DATA/verifying_truths"}
 
-# FUTURE Fix/climo roots for monthly obs climatology
+# Fix/climo roots for monthly obs climatology
 export FIXevs=${FIXevs:-$HOMEevs/fix}
-export GHCNCAMS_CLIMO_DIR=${GHCN_CAMS_CLIMO_DIR:-$FIXevs/climos/seasonal/GHCNCAMS}
+export GHCNCAMS_CLIMO_DIR=${GHCNCAMS_CLIMO_DIR:-$FIXevs/climos/seasonal/GHCNCAMS}
 export CMAP_CLIMO_DIR=${CMAP_CLIMO_DIR:-$FIXevs/climos/seasonal/CMAP}
-export CORe_CLIMO_DIR=${CORE_CLIMO_DIR:-$FIXevs/climos/seasonal/CORe}
-export OISSTv2_CLIMO_DIR=${OISST_CLIMO_DIR:-$FIXevs/climos/seasonal/OISSTv2}
-
-
-
+export CORe_CLIMO_DIR=${CORe_CLIMO_DIR:-$FIXevs/climos/seasonal/CORe}
+export OISSTv2_CLIMO_DIR=${OISSTv2_CLIMO_DIR:-$FIXevs/climos/seasonal/OISSTv2}
 
 export COMOUT=/lfs/h2/emc/vpppg/noscrub/$USER/$NET/${evs_ver_2d}/$STEP/$COMPONENT/$RUN
 
